@@ -1,35 +1,33 @@
+import os
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Basic Django settings
 BASE_DIR = Path(__file__).resolve().parent.parent
+SECRET_KEY = 'your-secret-key'
+DEBUG = False  # Turn off debug mode for production
+ALLOWED_HOSTS = ['*']  # Adjust to your domain if needed
 
-# Quick-start development settings - unsuitable for production
-DEBUG = False
+# Database configuration (default to SQLite for development)
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',  # SQLite database
+    }
+}
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-7f2t45dn+^!^3$8*87sf+c&tn9&!wqjvq-l%e6aupr&%sg0zt^'
-
-# Allow all hosts for public access
-ALLOWED_HOSTS = ['*']
-import django_heroku
-import dj_database_url
-import os
-# CSRF settings for public access
-CSRF_COOKIE_SECURE = False
-
-# Application definition
+# REST framework settings
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
     'rest_framework',
-    'rest_framework.authtoken',
-    'drfapp'
+    'drfapp',  # Your app where serializers are located
+     
 ]
 
+# Middleware
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -40,61 +38,52 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'drfproj.urls'
+# Static and Media settings - Since you're not using static files, these can be removed or commented
+STATIC_URL = '/static/'  # This is still needed for the reference in the project, but static files aren't served
 
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
+# For media files (if you need to serve them)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Heroku-specific settings (assuming you're deploying to Heroku)
+import django_heroku
+django_heroku.settings(locals())  # Automatically adds production settings for Heroku deployment
+
+# Security settings for production
+SECURE_SSL_REDIRECT = True  # Redirect all HTTP to HTTPS
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+X_FRAME_OPTIONS = 'DENY'
+
+# Logging to track deployment issues
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
         },
     },
-]
-
-WSGI_APPLICATION = 'drfproj.wsgi.application'
-
-# Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
 }
 
-# Password validation
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
+# Optional: CORS headers if you're using external APIs
+CORS_ALLOW_ALL_ORIGINS = True  # Make sure to configure this more securely in production
 
-# Localization settings
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
-USE_I18N = True
-USE_TZ = True
-
-# Static files (CSS, JavaScript, Images)
-STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS =(os.path.join(BASE_DIR, 'static'),)
-django_heroku.settings(locals())
-
-# Default primary key field type
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# Django Rest Framework settings (optional)
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
