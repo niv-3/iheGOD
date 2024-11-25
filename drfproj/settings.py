@@ -1,30 +1,29 @@
 import os
 from pathlib import Path
+import dj_database_url
 
-# Basic Django settings
+# Base directory path
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = 'your-secret-key'
-DEBUG = False  # Turn off debug mode for production
-ALLOWED_HOSTS = ['*']  # Adjust to your domain if needed
 
-# Database configuration (default to SQLite for development)
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',  # SQLite database
-    }
-}
+# Secret Key (Set this securely in Heroku)
+SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key')  # Use environment variable for production
 
-# REST framework settings
+# Debug mode (set from environment variable for safety)
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+
+# Allowed hosts for security (set your Heroku app's domain name here)
+ALLOWED_HOSTS = ['your-heroku-app-name.herokuapp.com', 'localhost']  # Replace with actual Heroku app name
+
+# Installed apps
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'rest_framework',
-    'drfapp',  # Your app where serializers are located
-     
+    'django.contrib.staticfiles',  # Static files handling
+    'drfapp',  # Your app
+    'rest_framework',  # Django REST Framework
 ]
 
 # Middleware
@@ -38,52 +37,63 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# Static and Media settings - Since you're not using static files, these can be removed or commented
-STATIC_URL = '/static/'  # This is still needed for the reference in the project, but static files aren't served
+# Root URL configuration
+ROOT_URLCONF = 'drfproj.urls'
 
-# For media files (if you need to serve them)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# Templates
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / 'templates'],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
 
-# Heroku-specific settings (assuming you're deploying to Heroku)
+# WSGI Application
+WSGI_APPLICATION = 'drfproj.wsgi.application'
+
+# Database configuration (use PostgreSQL for Heroku)
+import dj_database_url
+
+DATABASES = {
+    'default': dj_database_url.config(default='postgres://localhost')
+}
+
+
+# Password validation settings
+AUTH_PASSWORD_VALIDATORS = [
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
+]
+
+# Internationalization settings
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_TZ = True
+
+# Static files configuration for Heroku (using WhiteNoise)
+STATIC_URL = '/static/'  
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # WhiteNoise will use this for static files
+
+# Security settings for production (ensure SSL and secure redirects)
+SECURE_SSL_REDIRECT = True
+
 import django_heroku
-django_heroku.settings(locals())  # Automatically adds production settings for Heroku deployment
+from whitenoise import WhiteNoise
 
-# Security settings for production
-SECURE_SSL_REDIRECT = True  # Redirect all HTTP to HTTPS
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
-X_FRAME_OPTIONS = 'DENY'
+# Activate Django-Heroku settings
+django_heroku.settings(locals())
 
-# Logging to track deployment issues
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-    },
-}
-
-# Optional: CORS headers if you're using external APIs
-CORS_ALLOW_ALL_ORIGINS = True  # Make sure to configure this more securely in production
-
-# Django Rest Framework settings (optional)
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
-}
+# Configure static files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
