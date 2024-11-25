@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import dj_database_url
+import django_heroku
 
 # Base directory path
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -61,12 +62,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'drfproj.wsgi.application'
 
 # Database configuration (use PostgreSQL for Heroku)
-import dj_database_url
-
 DATABASES = {
-    'default': dj_database_url.config(default='postgres://localhost')
+    'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
 }
-
 
 # Password validation settings
 AUTH_PASSWORD_VALIDATORS = [
@@ -88,9 +86,6 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'  # WhiteNoise will use this for static fi
 
 # Security settings for production (ensure SSL and secure redirects)
 SECURE_SSL_REDIRECT = True
-
-import django_heroku
-from whitenoise import WhiteNoise
 
 # Activate Django-Heroku settings
 django_heroku.settings(locals())
