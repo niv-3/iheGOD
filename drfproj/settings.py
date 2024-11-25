@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 import dj_database_url
 import django_heroku
+from whitenoise import WhiteNoise
 
 # Base directory path
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -13,7 +14,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key')  # Use environment varia
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 # Allowed hosts for security (set your Heroku app's domain name here)
-ALLOWED_HOSTS = ['your-heroku-app-name.herokuapp.com', 'localhost']  # Replace with actual Heroku app name
+ALLOWED_HOSTS = ['niv-genre.herokuapp.com', 'localhost']
 
 # Installed apps
 INSTALLED_APPS = [
@@ -81,14 +82,14 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files configuration for Heroku (using WhiteNoise)
-STATIC_URL = '/static/'  
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # WhiteNoise will use this for static files
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# WhiteNoise for static files handling
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Security settings for production (ensure SSL and secure redirects)
 SECURE_SSL_REDIRECT = True
 
 # Activate Django-Heroku settings
 django_heroku.settings(locals())
-
-# Configure static files
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
