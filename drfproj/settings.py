@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 import dj_database_url
 import django_heroku
-from whitenoise import WhiteNoise
 
 # Base directory path
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -13,8 +12,8 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key')  # Use environment varia
 # Debug mode (set from environment variable for safety)
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-# Allowed hosts for security (set your Heroku app's domain name here)
-ALLOWED_HOSTS = ['niv-genre.herokuapp.com', 'localhost']
+# Allowed hosts for security (set your Heroku app's domain name here, or '*' for all hosts)
+ALLOWED_HOSTS = ['*']  # Allow all hosts (Be cautious in production)
 
 # Installed apps
 INSTALLED_APPS = [
